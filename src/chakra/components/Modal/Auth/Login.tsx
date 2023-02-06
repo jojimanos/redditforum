@@ -38,6 +38,14 @@ export const Login:React.FC<LoginProps> = () => {
             <Input name="email" placeholder="email" type="email" mb={2} onChange={onChange}/>
             <Input name="password" placeholder="password" type="password" onChange={onChange}/>
             <Button width="100%" height="36px" type="submit" mt={2} mb={2}>Log In</Button>
+            <Flex fontSize="9pt" justifyContent="center">
+                <Text mr={1}>Forgot your password?</Text>
+                <Text color="blue.500" fontWeight={700} cursor="pointer" onClick={() => setAuthModalState((prev) =>({
+                        ...prev,
+                        view: "resetPassword",
+                    }))
+                    }>Reset</Text>
+            </Flex>
             {(error) && <Text textAlign="center" color="red" fontSize="submit">
             {FIREBASE_ERRORS[error?.message as keyof typeof FIREBASE_ERRORS]}
             </Text>}
