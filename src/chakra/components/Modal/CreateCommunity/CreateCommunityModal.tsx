@@ -1,3 +1,4 @@
+import { auth, firestore } from "@/firebase/clientApp";
 import {
   Box,
   Button,
@@ -15,7 +16,9 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { ReactElement, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
 
@@ -28,9 +31,12 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   open,
   handleClose,
 }) => {
+  const [user] = useAuthState(auth);
   const [communityName, setCommunityName] = useState("");
   const [charsRemaining, setCharsRemaining] = useState(21);
   const [communityType, setCommunityType] = useState("public");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length > 21) return;
@@ -44,9 +50,49 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   ) => {
     setCommunityType(event.target.name);
   };
+
+  const handleCreateCommunity = async () => {
+    if (error) {
+      setError("");
+    }
+    const format = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
+
+    if (format.test(communityName) || communityName.length <= 3) {
+      setError(
+        "Community names must be between 3–21 characters, and can only contain letters, numbers, or underscores."
+      );
+    }
+
+    setLoading(true);
+
+    try {
+      const communityDocRef = doc(firestore, "communities", communityName);
+      const communityDoc = await getDoc(communityDocRef);
+
+      // check if community exists in db
+      if (communityDoc.exists()) {
+        throw new Error(`Sorry, r/${communityName} is taken. Try another.`);
+        return;
+      }
+      //create community
+      await setDoc(communityDocRef, {
+        creatorId: user?.uid,
+        createdAt: serverTimestamp(),
+        numberOfMembers: 1,
+        privaceType: communityType,
+      });
+    } catch (error: any) {
+      console.log("handleCreateCommunity", error);
+      setError(error.message);
+    }
+    // create the community name in Firestore
+    //CHECK if name is taken. If not create community
+
+    setLoading(false);
+  };
   return (
     <>
-      <Modal isOpen={open} onClose={handleClose}>
+      <Modal isOpen={open} onClose={handleClose} size="lg">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader
@@ -68,7 +114,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
               </Text>
               <Text
                 position="relative"
-                top="20px"
+                top="28px"
                 left="10px"
                 width="20px"
                 color="gray.400"
@@ -87,6 +133,9 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                 color={charsRemaining === 21 ? "red" : "gray.500"}
               >
                 {charsRemaining}Characters remaining
+              </Text>
+              <Text fontSize="9pt" color="red" pt={1}>
+                {error}
               </Text>
               <Box mt={4} mb={4}>
                 <Text fontWeight={600} fontSize={15}>
@@ -144,11 +193,22 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
               </Box>
             </ModalBody>
           </Box>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleClose}>
-              Close
+          <ModalFooter bg="gray.100" borderRadius="0px 0px 10px 10px">
+            <Button
+              variant="outline"
+              height="30px"
+              mr={3}
+              onClick={handleClose}
+            >
+              Cancel
             </Button>
-            <Button variant="ghost">Create Community</Button>
+            <Button
+              height="30px"
+              onClick={handleCreateCommunity}
+              isLoading={loading}
+            >
+              Create Community
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
