@@ -6,6 +6,7 @@ import { Community } from "@/atoms/communitiesAtom";
 import safeJsonStringify from "safe-json-stringify";
 import Header from "@/chakra/components/Community/Header";
 import PageContent from "@/chakra/components/Layout/PageContent";
+import CreatePostLink from "@/chakra/components/Community/CreatePostLink";
 
 type CommunityPageProps = {
   communityData: Community;
@@ -21,7 +22,7 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <Header communityData={communityData} />
       <PageContent>
         <>
-          <div>LHS</div>
+          <CreatePostLink />
         </>
         <>
           <div>RHS</div>
