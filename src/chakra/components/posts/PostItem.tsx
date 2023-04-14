@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Flex,
   Icon,
@@ -29,7 +29,7 @@ type PostItemsProps = {
   userIdCreator: boolean;
   userVoteValue: number;
   onVote: () => {};
-  onDeletePost: () => {};
+  onDeletePost: (post: Post) => Promise<boolean>;
   onSelectPost: () => void;
 };
 
@@ -41,6 +41,22 @@ const PostItem: React.FC<PostItemsProps> = ({
   onDeletePost,
   onSelectPost,
 }) => {
+  const [loadingImage, setLoadingImage] = useState(true);
+  const [error, setError] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const success = await onDeletePost(post);
+
+      if (!success) {
+        throw new Error("failed to delete post");
+      }
+      console.log("Post was successfully deleted");
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
   return (
     <Flex
       border="1px solid"
@@ -79,11 +95,20 @@ const PostItem: React.FC<PostItemsProps> = ({
           <Text fontSize="10pt">{post.body}</Text>
           {post.imageURL && (
             <Flex justify="counter" align="center" p={2}>
-              <Image src={post.imageURL} maxHeight="460px" alt="Post Image" />
+              {loadingImage && (
+                <Skeleton height="200px" width="100%" borderRadius={4} />
+              )}
+              <Image
+                src={post.imageURL}
+                maxHeight="460px"
+                alt="Post Image"
+                display={loadingImage ? "none" : "unset"}
+                onLoad={() => setLoadingImage(false)}
+              />
             </Flex>
           )}
         </Stack>
-        <Flex ml={1} mb={0.5} color="gray.500" fontWeight={600}>
+        <Flex ml={1} mb={0.5} color="gray.500">
           <Flex
             align="center"
             p="8px 10px"
@@ -95,6 +120,42 @@ const PostItem: React.FC<PostItemsProps> = ({
             <Icon as={BsChat} mr={2} />
             <Text fontSize="9pt">{post.numberOfComments}</Text>
           </Flex>
+          <Flex
+            align="center"
+            p="8px 10px"
+            borderRadius={4}
+            _hover={{ bg: "gray.700" }}
+            cursor="pointer:w
+            "
+          >
+            <Icon as={IoArrowRedoOutline} mr={2} />
+            <Text fontSize="9pt">Share</Text>
+          </Flex>
+          <Flex
+            align="center"
+            p="8px 10px"
+            borderRadius={4}
+            _hover={{ bg: "gray.700" }}
+            cursor="pointer:w
+            "
+          >
+            <Icon as={IoBookmarkOutline} mr={2} />
+            <Text fontSize="9pt">Save</Text>
+          </Flex>
+          {userIdCreator && (
+            <Flex
+              align="center"
+              p="8px 10px"
+              borderRadius={4}
+              _hover={{ bg: "gray.700" }}
+              cursor="pointer:w
+            "
+              onClick={handleDelete}
+            >
+              <Icon as={AiOutlineDelete} mr={2} />
+              <Text fontSize="9pt">Delete</Text>
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </Flex>
