@@ -15,14 +15,14 @@ import { useState } from "react";
 import TextInputs from "./postForum/TextInputs";
 import React from "react";
 import ImageUpload from "./postForum/ImageUpload";
-import { Post } from "../../../atoms/postsAtoms.ts";
+import { Post } from "../../../atoms/postsAtoms";
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
 import {
   addDoc,
   collection,
   serverTimestamp,
-  TimeStamp,
+  Timestamp,
   updateDoc,
 } from "firebase/firestore";
 import { firestore, storage } from "@/firebase/clientApp";
@@ -81,7 +81,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
       body: textInputs.body,
       numberOfComments: 0,
       voteStatus: 0,
-      createdAt: serverTimestamp() as TimeStamp,
+      createdAt: serverTimestamp() as Timestamp,
     };
 
     setLoading(true);

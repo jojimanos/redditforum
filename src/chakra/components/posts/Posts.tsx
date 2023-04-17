@@ -8,6 +8,7 @@ import { Post } from "@/atoms/postsAtoms";
 import PostItem from "./PostItem";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Stack } from "@chakra-ui/react";
+import PostsLoader from "./PostsLoader";
 
 type PostsProps = {
   communityData: Community;
@@ -57,7 +58,7 @@ const Posts: React.FC<PostsProps> = ({ communityData }) => {
         <Stack>
           {postStateValue.posts.map((item) => (
             <PostItem
-              ket={item.id}
+              key={item.id}
               post={item}
               userIdCreator={user?.uid === item.creatorId}
               userVoteValue={undefined}

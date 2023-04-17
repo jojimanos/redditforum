@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import {
+  Alert,
+  AlertIcon,
   Flex,
   Icon,
   Image,
@@ -42,9 +44,11 @@ const PostItem: React.FC<PostItemsProps> = ({
   onSelectPost,
 }) => {
   const [loadingImage, setLoadingImage] = useState(true);
+  const [loadingDelete, setLoadingDelete] = useState(false);
   const [error, setError] = useState(false);
 
   const handleDelete = async () => {
+    setLoadingDelete(true);
     try {
       const success = await onDeletePost(post);
 
@@ -55,6 +59,7 @@ const PostItem: React.FC<PostItemsProps> = ({
     } catch (error: any) {
       setError(error.message);
     }
+    setLoadingDelete(false);
   };
 
   return (
@@ -82,6 +87,12 @@ const PostItem: React.FC<PostItemsProps> = ({
         color={userVoteValue === 1 ? "brand.100" : "gray.400"}
       />
       <Flex direction="column" width="100%">
+        {error && (
+          <Alert status="error">
+            <AlertIcon />
+            <Text>Error creating post</Text>
+          </Alert>
+        )}
         <Stack spacing={1} p="10px">
           <Stack direction="row" spacing={0.6} align="center" fontSize="9pt">
             <Text>
@@ -152,8 +163,14 @@ const PostItem: React.FC<PostItemsProps> = ({
             "
               onClick={handleDelete}
             >
-              <Icon as={AiOutlineDelete} mr={2} />
-              <Text fontSize="9pt">Delete</Text>
+              {loadingDelete ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <Icon as={AiOutlineDelete} mr={2} />
+                  <Text fontSize="9pt">Delete</Text>
+                </>
+              )}
             </Flex>
           )}
         </Flex>
