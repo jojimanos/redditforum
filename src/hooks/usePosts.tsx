@@ -8,7 +8,22 @@ import { useRecoilState } from "recoil";
 const usePosts = () => {
   const [postStateValue, setPostStateValue] = useRecoilState(postState);
 
-  const onVote = async () => {};
+  const onVote = async (post: Post, vote: number, communityId: string) => {
+    if (newVote) {
+      //add/subtract 1 to/from post.voteStatus
+      //create a new postVote document
+    }
+    // in case of existing vote
+    else {
+      if (removingVote) {
+        //removing their note (up => neuteral or down => neutral)
+        //delete the post vote document
+      } else {
+        //flipping their vote (up => down, down => up)
+        //updating the existing postVote document
+      }
+    }
+  };
 
   const onSelectPost = () => {};
 

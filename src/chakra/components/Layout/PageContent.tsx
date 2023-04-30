@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 
 interface PageContentProps {
   children: [];
@@ -11,18 +11,18 @@ const PageContent: React.FC<PageContentProps> = ({ children }) => {
       <Flex width="95%" justify="center" maxWidth="800px">
         <Flex
           direction="column"
-          width={{ base: "100%", md: "85%" }}
+          width={{ base: "100%", md: "65%" }}
           mr={{ base: 0, md: 6 }}
         >
           {children && children[0 as keyof typeof children]}
         </Flex>
-        <Flex
-          direction="column"
+        <Box
+          flexDirection="column"
           display={{ base: "none", md: "flex" }}
           flexGrow={1}
         >
           {children && children[1 as keyof typeof children]}
-        </Flex>
+        </Box>
       </Flex>
     </Flex>
   );
