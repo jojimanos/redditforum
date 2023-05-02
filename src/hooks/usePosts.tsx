@@ -1,27 +1,61 @@
-import { Post, postState } from "@/atoms/postsAtoms";
-import { firestore, storage } from "@/firebase/clientApp";
-import { deleteDoc, doc } from "firebase/firestore";
+import { Post, PostVote, postState } from "@/atoms/postsAtoms";
+import { auth, firestore, storage } from "@/firebase/clientApp";
+import { collection, deleteDoc, doc, writeBatch } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import React from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState } from "recoil";
 
 const usePosts = () => {
+  const [user] = useAuthState(auth);
   const [postStateValue, setPostStateValue] = useRecoilState(postState);
 
   const onVote = async (post: Post, vote: number, communityId: string) => {
-    if (newVote) {
-      //add/subtract 1 to/from post.voteStatus
-      //create a new postVote document
-    }
-    // in case of existing vote
-    else {
-      if (removingVote) {
-        //removing their note (up => neuteral or down => neutral)
-        //delete the post vote document
-      } else {
-        //flipping their vote (up => down, down => up)
-        //updating the existing postVote document
+    // check for a user => if not, open auth modal
+
+    try {
+      const { voteStatus } = post;
+      const existingVote = postStateValue.postVotes.find(
+        (vote) => vote.postId === post.id
+      );
+
+      const batch = writeBatch(firestore);
+      const updatedPost = { ...post };
+      const updatedPosts = [...postStateValue.posts];
+      let updatedPostVotes = [...postStateValue.postVotes];
+      let voteChange = vote;
+
+      if (!existingVote) {
+        //create a new postVote document
+        const postVoteRef = doc(
+          collection(firestore, "users", `${user?.uid}/postVotes`)
+        );
+
+        const newVote: PostVote = {
+          id: postVoteRef.id,
+          postId: post.id!,
+          communityId,
+          voteValue: vote, // 1 or -1
+        };
+
+        batch.set(postVoteRef, newVote);
       }
+      
+      updatedPost.voteStatus = voteStatus + vote
+      updatedPostVotes = [...updatedPostVotes, newVote]
+
+    }
+      else {
+        if (removingVote) {
+          //removing their note (up => neutral or down => neutral)
+          //delete the post vote document
+        } else {
+          //flipping their vote (up => down, down => up)
+          //updating the existing postVote document
+        }
+      }
+    } catch (error: any) {
+      console.log("Vote", error.message);
     }
   };
 
