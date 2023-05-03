@@ -29,8 +29,8 @@ import moment from "moment";
 type PostItemsProps = {
   post: Post;
   userIdCreator: boolean;
-  userVoteValue: number;
-  onVote: () => {};
+  userVoteValue?: number;
+  onVote: (post: Post, vote: number, communityId: string) => void;
   onDeletePost: (post: Post) => Promise<boolean>;
   onSelectPost: () => void;
 };
@@ -79,13 +79,29 @@ const PostItem: React.FC<PostItemsProps> = ({
         p={2}
         width="40px"
         borderRadius={4}
-      ></Flex>
-      <Icon
-        as={
-          userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowDownCircleOutline
-        }
-        color={userVoteValue === 1 ? "brand.100" : "gray.400"}
-      />
+      >
+        <Icon
+          as={
+            userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowUpCircleOutline
+          }
+          color={userVoteValue === 1 ? "brand.100" : "gray.400"}
+          fontSize={22}
+          onClick={() => onVote(post, 1, post.communityId)}
+          cursor="pointer"
+        />
+        <Text fontSize="9pt">{post.voteStatus}</Text>
+        <Icon
+          as={
+            userVoteValue === -1
+              ? IoArrowDownCircleSharp
+              : IoArrowDownCircleOutline
+          }
+          color={userVoteValue === -1 ? "#4379FF" : "gray.400"}
+          fontSize={22}
+          cursor="pointer"
+          onClick={() => onVote(post, -1, post.communityId)}
+        />
+      </Flex>
       <Flex direction="column" width="100%">
         {error && (
           <Alert status="error">
