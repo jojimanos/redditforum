@@ -2,7 +2,7 @@ import { Timestamp } from "firebase/firestore";
 import { atom } from "recoil";
 
 export interface Community {
-    id: String;
+    id: string;
     creatorId: String;
     numberOfMembers: number;
     privacyType: 'public' | 'restricted' | 'private';
@@ -11,7 +11,7 @@ export interface Community {
 }
 
 export interface CommunitySnippet {
-    communityId: String;
+    communityId: string;
     isModerator?: boolean;
     imageURL?: string;
 }
