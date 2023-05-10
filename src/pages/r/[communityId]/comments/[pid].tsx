@@ -2,6 +2,7 @@ import { Post } from "@/atoms/postsAtoms";
 import About from "@/chakra/components/Community/About";
 import PageContent from "@/chakra/components/Layout/PageContent";
 import PostItem from "@/chakra/components/posts/PostItem";
+import Comments from "@/chakra/components/posts/comments/Comments";
 import { auth, firestore } from "@/firebase/clientApp";
 import useCommunityData from "@/hooks/useCommunityData";
 import usePosts from "@/hooks/usePosts";
@@ -54,6 +55,7 @@ const PostPage: React.FC = () => {
             userIdCreator={user?.uid === postStateValue.selectedPost.creatorId}
           />
         )}
+        <Comments />
       </>
       <>
         {communityStateValue.currentCommunity && (
