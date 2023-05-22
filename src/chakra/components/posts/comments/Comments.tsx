@@ -1,8 +1,30 @@
-import { Post } from "@/atoms/postsAtoms";
-import { Box, Flex } from "@chakra-ui/react";
+import { Post, postState } from "@/atoms/postsAtoms";
+import {
+  Box,
+  Flex,
+  SkeletonCircle,
+  SkeletonText,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { User } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import CommentInput from "./CommentInput";
+import {
+  Timestamp,
+  collection,
+  doc,
+  getDocs,
+  increment,
+  orderBy,
+  query,
+  serverTimestamp,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { firestore } from "@/firebase/clientApp";
+import { useSetRecoilState } from "recoil";
+import CommentItem, { Comment } from "./CommentItem";
 
 type CommentsProps = {
   user: User;
@@ -16,18 +38,56 @@ const Comments: React.FC<CommentsProps> = ({
   communityId,
 }) => {
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState([]);
-  const [fetchLoading, setFetchLoading] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [createLoading, setCreateLoading] = useState(false);
+  const setPostState = useSetRecoilState(postState);
 
   const onCreateComment = async (commentText: string) => {
-    // create comments document
-    // update post number of comments
+    setCreateLoading(true);
     try {
+      const batch = writeBatch(firestore);
+      // create comments document
+      const commentDocRef = doc(collection(firestore, "comments"));
+
+      const newComment: Comment = {
+        id: commentDocRef.id,
+        creatorId: user.uid,
+        creatorDisplayText: user.email!.split("@")[0],
+        communityId,
+        postId: selectedPost?.id!,
+        postTitle: selectedPost?.title!,
+        text: commentText,
+        createdAt: serverTimestamp() as Timestamp,
+      };
+
+      batch.set(commentDocRef, newComment);
+
+      newComment.createdAt = { seconds: Date.now() / 1000 } as Timestamp;
+
+      // update post number of comments
+      const postDocRef = doc(firestore, "posts", selectedPost?.id!);
+      batch.update(postDocRef, {
+        numberOfComments: increment(1),
+      });
+
+      await batch.commit();
+
+      // update client recoil state
+
+      setCommentText("");
+      setComments((prev) => [newComment, ...prev]);
+      setPostState((prev) => ({
+        ...prev,
+        selectedPost: {
+          ...prev.selectedPost,
+          numberOfComments: prev.selectedPost?.numberOfComments! + 1,
+        } as Post,
+      }));
     } catch (error: any) {
       console.log("Create Comment error", error.message);
     }
-    // update client recoil state
+    setCreateLoading(false);
   };
 
   const onDeleteComment = async (comment: any) => {
@@ -36,7 +96,24 @@ const Comments: React.FC<CommentsProps> = ({
     // update client recoil state
   };
 
-  const getPostComments = async () => {};
+  const getPostComments = async () => {
+    try {
+      const commentsQuery = query(
+        collection(firestore, "comment"),
+        where("postId", "==", selectedPost?.id),
+        orderBy("createdAt", "desc")
+      );
+      const commentDocs = await getDocs(commentsQuery);
+      const comments = commentDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComments(comments as Comment[]);
+    } catch (error) {
+      console.log("Get Post Comments error", error);
+    }
+    setFetchLoading(false);
+  };
 
   useEffect(() => {
     getPostComments();
@@ -60,6 +137,47 @@ const Comments: React.FC<CommentsProps> = ({
           onCreateComment={onCreateComment}
         />
       </Flex>
+      <Stack spacing={6} p={2}>
+        {fetchLoading ? (
+          <>
+            {[0, 1, 2].map((item) => (
+              <Box key={item} padding="6" bg="white">
+                <SkeletonCircle size="10" />
+                <SkeletonText mt="4" noOfLines={2} spacing="4" />
+              </Box>
+            ))}
+          </>
+        ) : (
+          <>
+            {comments.length === 0 ? (
+              <Flex
+                direction="column"
+                justify="center"
+                align="center"
+                borderTop="1px solid"
+                borderColor="gray.100"
+                p={20}
+              >
+                <Text fontWeight={700} opacity={0.3}>
+                  No Comments Yet
+                </Text>
+              </Flex>
+            ) : (
+              <>
+                {comments.map((comment, index) => (
+                  <CommentItem
+                    key={index}
+                    comment={comment}
+                    onDeleteComment={onDeleteComment}
+                    loadingDelete={false}
+                    userId={user.uid}
+                  />
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </Stack>
     </Box>
   );
 };
