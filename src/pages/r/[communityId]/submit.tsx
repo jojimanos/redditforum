@@ -6,6 +6,7 @@ import { auth } from "../../../firebase/clientApp";
 import { useRecoilState } from "recoil";
 import { communityState } from "@/atoms/communitiesAtom";
 import useCommunityData from "@/hooks/useCommunityData";
+import About from "@/chakra/components/Community/About";
 
 const SubmitPostPage: React.FC = () => {
   const [user] = useAuthState(auth);
@@ -20,7 +21,12 @@ const SubmitPostPage: React.FC = () => {
         <Box p="14px 0px" borderBottom="1px solid" borderColor="white">
           <Text>Create a Post</Text>
         </Box>
-        {user && <NewPostForm user={user} />}
+        {user && (
+          <NewPostForm
+            user={user}
+            communityImageURL={communityStateValue.currentCommunity?.imageURL}
+          />
+        )}
       </>
       <>
         {communityStateValue.currentCommunity && (
