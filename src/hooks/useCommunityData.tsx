@@ -50,6 +50,7 @@ const useCommunityData = () => {
       setCommunityStateValue((prev) => ({
         ...prev,
         mySnippets: snippets as CommunitySnippet[],
+        snippetFetched: true,
       }));
     } catch (error: any) {
       console.log("get my snippets error", error);
@@ -97,12 +98,12 @@ const useCommunityData = () => {
     setLoading(false);
   };
 
-  const leavedCommunity = async (communityId: String) => {
+  const leavedCommunity = async (communityId: string) => {
     try {
       const batch = writeBatch(firestore);
 
       batch.delete(
-        doc(firestore, `users/${user?.uid}/communitySnippets`, communityId)
+        doc(firestore, `users/${user?.uid}/communitySnippets${communityId}`)
       );
 
       batch.update(doc(firestore, "communities", communityId), {
@@ -150,6 +151,7 @@ const useCommunityData = () => {
       setCommunityStateValue((prev) => ({
         ...prev,
         mySnippets: [],
+        snippetFetched: false,
       }));
       return;
     }

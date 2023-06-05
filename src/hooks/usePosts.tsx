@@ -25,7 +25,7 @@ const usePosts = () => {
   const setAuthModalState = useSetRecoilState(AuthModalState);
 
   const onVote = async (
-    event: React.MouseEvent<SVGAElement, MouseEvent>,
+    event: React.MouseEvent<SVGElement, MouseEvent>,
     post: Post,
     vote: number,
     communityId: string

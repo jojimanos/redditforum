@@ -79,11 +79,11 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
 
   const handleCreatePost = async () => {
     const { communityId } = router.query;
-    const newPost: Post = {
+    const newPost = {
       communityId: communityId as string,
       communityImageURL: communityImageURL || "",
       creatorId: user.uid,
-      creatorDisplayName: user.email?.split("@")[0],
+      creatorDisplayName: user.email!.split("@")[0],
       title: textInputs.title,
       body: textInputs.body,
       numberOfComments: 0,
