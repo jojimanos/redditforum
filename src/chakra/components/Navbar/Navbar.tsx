@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
       >
         <Image src="/images/reddit.png" alt="" height={10} width={10} />
         <Image
-          src=""
+          src="/images/logo.png"
           alt="reddit"
           height={10}
           width={10}
