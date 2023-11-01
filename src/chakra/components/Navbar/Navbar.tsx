@@ -26,10 +26,10 @@ const Navbar: React.FC = () => {
         cursor="pointer"
         onClick={() => onSelectMenuItem(defaultMenuItem)}
       >
-        <Image src="/images/crux.png" alt="" height={10} width={10} />
+        <Image src="/images/reddit.png" alt="" height={10} width={10} />
         <Image
           src="/images/worried.png"
-          alt=""
+          alt="reddit"
           height={10}
           width={10}
           display={{ base: "none", md: "unset" }}
